@@ -1,13 +1,13 @@
-# API REST - Backend de Productos con Spring Boot
 
-Backend RESTful API para gestión de productos, desarrollado con Spring Boot y PostgreSQL.
+# API REST - Backend de Historias Clínicas
+
+Backend RESTful para gestión de pacientes, médicos y sus historias clínicas, desarrollado con Spring Boot y PostgreSQL.
 
 ## 🚀 Características
 
-- **CRUD completo** de productos
+- **CRUD completo** de Pacientes, Médicos y Historiales Clínicos
 - **Validación de datos** con Bean Validation
-- **Eliminación lógica** y física
-- **Búsqueda** por nombre y categoría
+- **Relaciones entre entidades** (Paciente, Medico, HistorialClinica)
 - **PostgreSQL** como base de datos
 - **CORS configurado** para integración con Flutter
 - **Manejo global de excepciones**
@@ -17,21 +17,21 @@ Backend RESTful API para gestión de productos, desarrollado con Spring Boot y P
 
 - Java 17 o superior
 - Maven 3.6+
-- PostgreSQL 12 o superior
+- PostgreSQL 18 o superior
 
 ## 🗄️ Configuración de la Base de Datos
 
 1. Instala PostgreSQL
-2. Crea una base de datos:
+2. Crea la base de datos:
 
 ```sql
-CREATE DATABASE productos_db;
+CREATE DATABASE hclinico_db;
 ```
 
 3. Configura las credenciales en `src/main/resources/application.properties`:
 
 ```properties
-spring.datasource.url=jdbc:postgresql://localhost:5432/productos_db
+spring.datasource.url=jdbc:postgresql://localhost:5433/hclinico_db
 spring.datasource.username=postgres
 spring.datasource.password=tu_contraseña
 ```
@@ -65,88 +65,114 @@ Swagger UI permite:
 
 ## 📡 Endpoints de la API
 
-### Productos
-
+### Pacientes
 | Método | Endpoint | Descripción |
 |--------|----------|-------------|
-| GET | `/api/productos` | Obtener todos los productos |
-| GET | `/api/productos/activos` | Obtener productos activos |
-| GET | `/api/productos/{id}` | Obtener producto por ID |
-| POST | `/api/productos` | Crear nuevo producto |
-| PUT | `/api/productos/{id}` | Actualizar producto |
-| DELETE | `/api/productos/{id}` | Eliminar producto (lógico) |
-| DELETE | `/api/productos/{id}/permanente` | Eliminar producto (físico) |
-| GET | `/api/productos/buscar?nombre=xxx` | Buscar por nombre |
-| GET | `/api/productos/categoria/{cat}` | Buscar por categoría |
+| GET    | `/api/pacientes` | Obtener todos los pacientes |
+| GET    | `/api/pacientes/{dni}` | Obtener paciente por DNI |
+| POST   | `/api/pacientes` | Crear nuevo paciente |
+| PUT    | `/api/pacientes/{dni}` | Actualizar paciente |
+| DELETE | `/api/pacientes/{dni}` | Eliminar paciente |
+
+### Médicos
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET    | `/api/medicos` | Obtener todos los médicos |
+| GET    | `/api/medicos/{cmp}` | Obtener médico por CMP |
+| POST   | `/api/medicos` | Crear nuevo médico |
+| PUT    | `/api/medicos/{cmp}` | Actualizar médico |
+| DELETE | `/api/medicos/{cmp}` | Eliminar médico |
+
+### Historiales Clínicos
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| GET    | `/api/historiales` | Obtener todos los historiales |
+| GET    | `/api/historiales/{id}` | Obtener historial por ID |
+| POST   | `/api/historiales` | Crear nuevo historial |
+| PUT    | `/api/historiales/{id}` | Actualizar historial |
+| DELETE | `/api/historiales/{id}` | Eliminar historial |
+| GET    | `/api/historiales/paciente/{dni}` | Buscar historiales por paciente |
+| GET    | `/api/historiales/medico/{cmp}` | Buscar historiales por médico |
 
 ## 📝 Modelo de Datos
 
-### Producto
+### Paciente
+```json
+{
+  "dni": "12345678",
+  "nombre": "Juan Carlos",
+  "apellidoPaterno": "García",
+  "apellidoMaterno": "López",
+  "direccion": "Av. Los Pinos 123, Lima",
+  "telefono": "987654321"
+}
+```
 
+### Médico
+```json
+{
+  "cmp": "CMP-12345",
+  "nombre": "Roberto",
+  "apellidos": "Hernández Salazar",
+  "especialidad": "Cardiología"
+}
+```
+
+### Historial Clínico
 ```json
 {
   "id": 1,
-  "nombre": "Laptop HP",
-  "descripcion": "Laptop HP 15.6 pulgadas",
-  "precio": 2500.00,
-  "stock": 10,
-  "categoria": "Tecnología",
-  "imagenUrl": "https://example.com/imagen.jpg",
-  "activo": true,
-  "fechaCreacion": "2024-01-15T10:30:00",
-  "fechaActualizacion": "2024-01-15T10:30:00"
+  "paciente": { ... },
+  "medico": { ... },
+  "fechaAtencion": "2024-01-15",
+  "diagnostico": "Hipertensión arterial",
+  "analisis": "Paciente presenta presión arterial elevada",
+  "tratamiento": "Enalapril 10mg cada 12 horas"
 }
 ```
 
 ## 📦 Ejemplos de Uso
 
-### Crear un producto (POST):
-
+### Crear un paciente (POST):
 ```bash
-curl -X POST http://localhost:8080/api/productos \
+curl -X POST http://localhost:8080/api/pacientes \
   -H "Content-Type: application/json" \
   -d '{
-    "nombre": "Mouse Logitech",
-    "descripcion": "Mouse inalámbrico",
-    "precio": 45.99,
-    "stock": 50,
-    "categoria": "Periféricos"
+    "dni": "12345678",
+    "nombre": "Juan Carlos",
+    "apellidoPaterno": "García",
+    "apellidoMaterno": "López",
+    "direccion": "Av. Los Pinos 123, Lima",
+    "telefono": "987654321"
   }'
 ```
 
-### Obtener todos los productos (GET):
-
+### Crear un historial clínico (POST):
 ```bash
-curl http://localhost:8080/api/productos
-```
-
-### Actualizar un producto (PUT):
-
-```bash
-curl -X PUT http://localhost:8080/api/productos/1 \
+curl -X POST http://localhost:8080/api/historiales \
   -H "Content-Type: application/json" \
   -d '{
-    "nombre": "Mouse Logitech MX",
-    "descripcion": "Mouse inalámbrico premium",
-    "precio": 89.99,
-    "stock": 30,
-    "categoria": "Periféricos",
-    "activo": true
+    "pacienteDni": "12345678",
+    "medicoCmp": "CMP-12345",
+    "fechaAtencion": "2024-01-15",
+    "diagnostico": "Hipertensión arterial",
+    "analisis": "Paciente presenta presión arterial elevada",
+    "tratamiento": "Enalapril 10mg cada 12 horas"
   }'
 ```
 
-### Eliminar un producto (DELETE):
-
+### Obtener todos los historiales (GET):
 ```bash
-curl -X DELETE http://localhost:8080/api/productos/1
+curl http://localhost:8080/api/historiales
 ```
 
 ## 🔐 Validaciones
 
 Los siguientes campos son obligatorios:
-- **nombre**: No puede estar vacío
-- **precio**: Debe ser mayor a 0
-- **stock**: No puede ser nulo
+- **dni**: Paciente debe tener 8 dígitos
+- **cmp**: Médico debe ser único y no vacío
+- **fechaAtencion**: No puede ser nula
+- **diagnostico**: No puede estar vacío
 
 ## 🌐 Integración con Flutter
 
@@ -154,7 +180,7 @@ El backend está configurado con CORS para aceptar peticiones desde cualquier or
 
 ```dart
 final response = await http.get(
-  Uri.parse('http://localhost:8080/api/productos'),
+  Uri.parse('http://localhost:8080/api/historiales'),
 );
 ```
 
@@ -168,17 +194,27 @@ src/main/java/upeu/edu/pe/Producto/
 │   ├── CorsConfig.java
 │   └── SwaggerConfig.java
 ├── controller/
-│   └── ProductoController.java
+│   ├── PacienteController.java
+│   ├── MedicoController.java
+│   └── HistorialClinicaController.java
 ├── entity/
-│   └── Producto.java
+│   ├── Paciente.java
+│   ├── Medico.java
+│   └── HistorialClinica.java
 ├── exception/
 │   └── GlobalExceptionHandler.java
 ├── repository/
-│   └── ProductoRepository.java
+│   ├── PacienteRepository.java
+│   ├── MedicoRepository.java
+│   └── HistorialClinicaRepository.java
 ├── service/
-│   ├── ProductoService.java
+│   ├── PacienteService.java
+│   ├── MedicoService.java
+│   ├── HistorialClinicaService.java
 │   └── impl/
-│       └── ProductoServiceImpl.java
+│       ├── PacienteServiceImpl.java
+│       ├── MedicoServiceImpl.java
+│       └── HistorialClinicaServiceImpl.java
 └── ProductoApplication.java
 ```
 
@@ -186,36 +222,33 @@ src/main/java/upeu/edu/pe/Producto/
 
 - **Spring Boot 3.5.7**
 - **Spring Data JPA**
-- **PostgreSQL**
+- **PostgreSQL 18.0**
 - **Lombok**
 - **Bean Validation**
-- **SpringDoc OpenAPI 2.3.0** (Swagger)
+- **SpringDoc OpenAPI 2.7.0** (Swagger)
 - **Maven**
 
 ## 📊 Base de Datos
 
-La tabla `productos` se crea automáticamente con el siguiente esquema:
+Las tablas se crean automáticamente por Hibernate/JPA. Ejemplo de tabla `historial_clinica`:
 
 ```sql
-CREATE TABLE productos (
+CREATE TABLE historial_clinica (
     id BIGSERIAL PRIMARY KEY,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(500),
-    precio DECIMAL(10,2) NOT NULL,
-    stock INTEGER NOT NULL,
-    categoria VARCHAR(50),
-    imagen_url VARCHAR(255),
-    activo BOOLEAN NOT NULL DEFAULT true,
-    fecha_creacion TIMESTAMP NOT NULL,
-    fecha_actualizacion TIMESTAMP
+    paciente_dni VARCHAR(8) NOT NULL REFERENCES pacientes(dni),
+    medico_cmp VARCHAR(20) NOT NULL REFERENCES medicos(cmp),
+    fecha_atencion DATE NOT NULL,
+    diagnostico VARCHAR(500) NOT NULL,
+    analisis VARCHAR(1000),
+    tratamiento VARCHAR(1000),
+    fecha_registro TIMESTAMP NOT NULL
 );
 ```
 
 ## 📝 Notas Adicionales
 
-- El campo `activo` permite eliminación lógica
-- Las fechas se gestionan automáticamente
 - El servidor corre por defecto en el puerto 8080
+- Las fechas se gestionan automáticamente
 - Los logs SQL están habilitados para debugging
 
 ## 🤝 Contribución
@@ -230,4 +263,3 @@ Para contribuir al proyecto:
 ## 📄 Licencia
 
 Este proyecto está bajo la Licencia MIT.
-"# backend-historialmedico" 
